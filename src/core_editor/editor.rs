@@ -19,7 +19,7 @@ pub struct Editor {
     edit_stack: EditStack<LineBuffer>,
     last_undo_behavior: UndoBehavior,
     selection_anchor: Option<usize>,
-    selection_mode: Option<PromptEditMode>,
+    selection_mode: PromptEditMode,
     edit_mode: PromptEditMode,
 }
 
@@ -33,7 +33,7 @@ impl Default for Editor {
             edit_stack: EditStack::new(),
             last_undo_behavior: UndoBehavior::CreateUndoPoint,
             selection_anchor: None,
-            selection_mode: None,
+            selection_mode: PromptEditMode::Default,
             edit_mode: PromptEditMode::Default,
         }
     }
@@ -201,10 +201,12 @@ impl Editor {
             EditCommand::CutTextObject { text_object } => self.cut_text_object(*text_object),
             EditCommand::CopyTextObject { text_object } => self.copy_text_object(*text_object),
         }
-        if !matches!(command.edit_type(), EditType::MoveCursor { select: true }) {
+
+        if !matches!(command.edit_type(), EditType::MoveCursor { select: true })
+            && !matches!(&self.edit_mode, PromptEditMode::Vi(PromptViMode::Visual))
+        {
             self.clear_selection();
         }
-        if let EditType::MoveCursor { select: true } = command.edit_type() {}
 
         let new_undo_behavior = match (command, command.edit_type()) {
             (_, EditType::MoveCursor { .. }) => UndoBehavior::MoveCursor,
@@ -233,14 +235,15 @@ impl Editor {
 
     pub(crate) fn clear_selection(&mut self) {
         self.selection_anchor = None;
-        self.selection_mode = None;
+        self.selection_mode = PromptEditMode::Default;
     }
 
     fn update_selection_anchor(&mut self, select: bool) {
-        if select {
+        let vi_visual = matches!(&self.edit_mode, PromptEditMode::Vi(PromptViMode::Visual));
+        if select || vi_visual {
             if self.selection_anchor.is_none() {
                 self.selection_anchor = Some(self.insertion_point());
-                self.selection_mode = Some(self.edit_mode.clone());
+                self.selection_mode = self.edit_mode.clone();
             }
         } else {
             self.clear_selection();
@@ -681,8 +684,8 @@ impl Editor {
 
         // Use the mode that was active when the selection was created, not the current mode
         let inclusive = matches!(
-            self.selection_mode.as_ref().unwrap_or(&self.edit_mode),
-            PromptEditMode::Vi(PromptViMode::Normal)
+            self.selection_mode,
+            PromptEditMode::Vi(PromptViMode::Visual)
         );
 
         let selection_is_from_left_to_right = selection_anchor < self.insertion_point();

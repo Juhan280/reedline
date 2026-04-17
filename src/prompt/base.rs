@@ -68,6 +68,9 @@ pub enum PromptViMode {
 
     /// Insertion mode
     Insert,
+
+    /// Visual mode
+    Visual,
 }
 
 /// This is the discriminant type for [`PromptEditMode`]
@@ -89,6 +92,10 @@ pub enum PromptEditModeDiscriminants {
     #[strum(serialize = "ViInsert", serialize = "vi_insert")]
     ViInsert,
 
+    /// Vi visual mode
+    #[strum(serialize = "ViVisual", serialize = "vi_visual")]
+    ViVisual,
+
     /// A custom mode
     Custom,
 }
@@ -107,6 +114,7 @@ impl Display for PromptEditMode {
             Self::Emacs => write!(f, "Emacs"),
             Self::Vi(Vi::Normal) => write!(f, "Vi_Normal"),
             Self::Vi(Vi::Insert) => write!(f, "Vi_Insert"),
+            Self::Vi(Vi::Visual) => write!(f, "Vi_Visual"),
             Self::Custom(s) => write!(f, "Custom_{s}"),
         }
     }
@@ -122,6 +130,7 @@ impl IntoDiscriminant for PromptEditMode {
             Self::Emacs => Self::Discriminant::Emacs,
             Self::Vi(Vi::Normal) => Self::Discriminant::ViNormal,
             Self::Vi(Vi::Insert) => Self::Discriminant::ViInsert,
+            Self::Vi(Vi::Visual) => Self::Discriminant::ViVisual,
             Self::Custom(_) => Self::Discriminant::Custom,
         }
     }

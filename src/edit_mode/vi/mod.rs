@@ -206,8 +206,9 @@ impl EditMode for Vi {
 
     fn edit_mode(&self) -> PromptEditMode {
         match self.mode {
-            ViMode::Normal | ViMode::Visual => PromptEditMode::Vi(PromptViMode::Normal),
+            ViMode::Normal => PromptEditMode::Vi(PromptViMode::Normal),
             ViMode::Insert => PromptEditMode::Vi(PromptViMode::Insert),
+            ViMode::Visual => PromptEditMode::Vi(PromptViMode::Visual),
         }
     }
 

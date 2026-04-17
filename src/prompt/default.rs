@@ -9,6 +9,8 @@ use {
 pub static DEFAULT_PROMPT_INDICATOR: &str = "〉";
 pub static DEFAULT_VI_INSERT_PROMPT_INDICATOR: &str = ": ";
 pub static DEFAULT_VI_NORMAL_PROMPT_INDICATOR: &str = "〉";
+// TODO: use a good default
+pub static DEFAULT_VI_VISUAL_PROMPT_INDICATOR: &str = "V ";
 pub static DEFAULT_MULTILINE_INDICATOR: &str = "::: ";
 
 /// Simple [`Prompt`] displaying a configurable left and a right prompt.
@@ -65,6 +67,7 @@ impl Prompt for DefaultPrompt {
             PromptEditMode::Vi(vi_mode) => match vi_mode {
                 PromptViMode::Normal => DEFAULT_VI_NORMAL_PROMPT_INDICATOR.into(),
                 PromptViMode::Insert => DEFAULT_VI_INSERT_PROMPT_INDICATOR.into(),
+                PromptViMode::Visual => DEFAULT_VI_VISUAL_PROMPT_INDICATOR.into(),
             },
             PromptEditMode::Custom(str) => format!("({str})").into(),
         }
